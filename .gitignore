@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Agrega .env al .gitignore
+echo ".env" >> .gitignore
