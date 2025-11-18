@@ -1,3 +1,4 @@
+# .gitignore actualizado
 # Logs
 logs
 *.log
@@ -12,6 +13,15 @@ dist
 dist-ssr
 *.local
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Archivos específicos a ignorar
+create_readme.bat
+Licencia_MIT.bat
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,6 +32,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Agrega .env al .gitignore
-echo ".env" >> .gitignore
