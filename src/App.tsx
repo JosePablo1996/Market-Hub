@@ -59,6 +59,106 @@ const LoadingScreen = () => {
   )
 }
 
+// Modal de confirmación para cerrar sesión
+const LogoutConfirmationModal = ({ 
+  isOpen, 
+  onClose, 
+  onConfirm,
+  userName,
+  userRole,
+  userAvatar,
+  isGuestMode 
+}: { 
+  isOpen: boolean
+  onClose: () => void
+  onConfirm: () => void
+  userName: string
+  userRole: string
+  userAvatar: React.ReactNode
+  isGuestMode: boolean
+}) => {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.8, opacity: 0, y: 20 }}
+            className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 max-w-md w-full border border-white/10 shadow-2xl"
+          >
+            {/* Encabezado del modal */}
+            <div className="text-center mb-6">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-r from-red-500 to-pink-600 flex items-center justify-center shadow-lg"
+              >
+                <LogOut className="h-10 w-10 text-white" />
+              </motion.div>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                {isGuestMode ? 'Salir del modo invitado' : 'Cerrar Sesión'}
+              </h3>
+              <p className="text-white/70">
+                {isGuestMode 
+                  ? '¿Estás seguro de que quieres salir del modo invitado?' 
+                  : '¿Estás seguro de que quieres cerrar tu sesión?'}
+              </p>
+            </div>
+
+            {/* Información del usuario */}
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white/5 rounded-2xl p-4 mb-6 border border-white/10"
+            >
+              <div className="flex items-center space-x-4">
+                {/* Avatar */}
+                <div className="flex-shrink-0">
+                  {userAvatar}
+                </div>
+                
+                {/* Información del usuario */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-white font-semibold truncate">{userName}</p>
+                  <p className="text-white/60 text-sm capitalize">{userRole}</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Botones de acción */}
+            <div className="flex space-x-4">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onClose}
+                className="flex-1 bg-white/10 hover:bg-white/20 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 border border-white/20"
+              >
+                No, Cancelar
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={onConfirm}
+                className="flex-1 bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg"
+              >
+                Sí, {isGuestMode ? 'Salir' : 'Cerrar Sesión'}
+              </motion.button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 // Componente mejorado para manejar la autenticación con modo invitado
 const AuthHandler = ({ 
   mode, 
@@ -207,6 +307,7 @@ function App() {
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   // Función para obtener el icono según el rol
   const getRoleIcon = (role: string) => {
@@ -278,8 +379,14 @@ function App() {
     }
   }
 
-  // Función para cerrar sesión que también desactiva el modo invitado
-  const handleSignOut = async () => {
+  // Función para manejar el cierre de sesión con confirmación
+  const handleSignOutWithConfirmation = () => {
+    setShowLogoutModal(true)
+  }
+
+  // Función para confirmar el cierre de sesión
+  const confirmSignOut = async () => {
+    setShowLogoutModal(false)
     await signOut()
     // Asegurarse de que el modo invitado se desactive al cerrar sesión
     if (guestMode) {
@@ -291,6 +398,21 @@ function App() {
   const handleEnableGuestMode = () => {
     enableGuestMode()
   }
+
+  // Avatar del usuario
+  const userAvatar = (
+    <motion.div 
+      whileHover={{ scale: 1.1 }}
+      className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg relative overflow-hidden"
+    >
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+      />
+      <User className="h-6 w-6 text-white relative z-10" />
+    </motion.div>
+  )
 
   // Mostrar Splash Screen primero
   if (showSplash) {
@@ -380,17 +502,7 @@ function App() {
                 </div>
                 <div className="h-10 w-px bg-gradient-to-b from-transparent via-white/50 to-transparent"></div>
                 <div className="flex items-center space-x-3">
-                  <motion.div 
-                    whileHover={{ scale: 1.1 }}
-                    className="w-12 h-12 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg relative overflow-hidden"
-                  >
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
-                    />
-                    <User className="h-6 w-6 text-white relative z-10" />
-                  </motion.div>
+                  {userAvatar}
                   <div>
                     <p className="text-sm font-bold text-white">
                       {guestMode ? 'Invitado' : profile?.full_name || 'Usuario'}
@@ -405,7 +517,7 @@ function App() {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={handleSignOut}
+                onClick={handleSignOutWithConfirmation}
                 className="flex items-center px-6 py-3 text-sm font-bold text-white hover:text-white/90 rounded-xl transition-all duration-300 hover:shadow-lg bg-white/10 backdrop-blur-sm border border-white/20"
               >
                 <LogOut className="h-5 w-5 mr-2" />
@@ -485,7 +597,7 @@ function App() {
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.2 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={handleSignOut}
+                      onClick={handleSignOutWithConfirmation}
                       className="w-full flex items-center justify-center px-4 py-4 text-sm font-bold text-white hover:text-white/90 rounded-xl transition-all duration-300 bg-white/10 backdrop-blur-sm border border-white/20"
                     >
                       <LogOut className="h-5 w-5 mr-2" />
@@ -595,6 +707,17 @@ function App() {
           </div>
         </div>
       </motion.footer>
+
+      {/* Modal de confirmación para cerrar sesión */}
+      <LogoutConfirmationModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={confirmSignOut}
+        userName={guestMode ? 'Invitado' : profile?.full_name || 'Usuario'}
+        userRole={getRoleDisplayName(guestMode ? 'guest' : profile?.role || 'user')}
+        userAvatar={userAvatar}
+        isGuestMode={guestMode}
+      />
     </motion.div>
   )
 }
