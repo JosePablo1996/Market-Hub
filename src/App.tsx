@@ -7,6 +7,7 @@ import UserDashboard from './components/User/UserDashboard'
 import ProveedorDashboard from './components/Proveedor/ProveedorDashboard'
 import AdminDashboard from './components/Admin/AdminDashboard'
 import { GuestDashboard } from './components/Guest/GuestDashboard'
+import { SplashScreen } from './components/Splash/SplashScreen'
 import { LogOut, ShoppingBag, User, Shield, Menu, X, Star, Zap, Globe, Eye, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -205,6 +206,7 @@ function App() {
   const { user, profile, loading, signOut, guestMode, enableGuestMode, disableGuestMode } = useAuth()
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showSplash, setShowSplash] = useState(true)
 
   // Función para obtener el icono según el rol
   const getRoleIcon = (role: string) => {
@@ -288,6 +290,11 @@ function App() {
   // Función para activar modo invitado
   const handleEnableGuestMode = () => {
     enableGuestMode()
+  }
+
+  // Mostrar Splash Screen primero
+  if (showSplash) {
+    return <SplashScreen onContinue={() => setShowSplash(false)} />
   }
 
   // Pantalla de carga
@@ -559,9 +566,9 @@ function App() {
                   className="flex items-center space-x-2 text-white mb-2"
                 >
                   <Star className="h-5 w-5 text-yellow-300" />
-                  <span className="font-bold">v2.1.0</span>
+                  <span className="font-bold">v2.2.0</span>
                 </motion.div>
-                <div className="text-white/70 text-xs">Con modo invitado</div>
+                <div className="text-white/70 text-xs"></div>
               </div>
             </motion.div>
 
