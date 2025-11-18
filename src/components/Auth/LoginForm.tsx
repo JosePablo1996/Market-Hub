@@ -1,6 +1,7 @@
 // src/components/Auth/LoginForm.tsx
 import React, { useState } from 'react'
 import { useAuth } from '../../contexts/useAuth'
+import { ForgotPasswordForm } from './ForgotPasswordForm'
 import { Eye, EyeOff, Lock, Mail, LogIn, Shield } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -10,8 +11,14 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [formLoading, setFormLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
   
   const { signIn, loading: authLoading } = useAuth()
+
+  // Si se activa el formulario de recuperación
+  if (showForgotPassword) {
+    return <ForgotPasswordForm onBackToLogin={() => setShowForgotPassword(false)} />
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -221,15 +228,18 @@ const LoginForm: React.FC = () => {
                     </motion.div>
                   )}
                   
-                  {/* Enlace de recuperación de contraseña */}
+                  {/* Botón de recuperación de contraseña - MEJORADO */}
                   <div className="mt-4 text-right">
-                    <button 
+                    <motion.button 
                       type="button"
-                      className="text-blue-200 hover:text-white text-xs font-semibold transition-all duration-200 hover:underline tracking-wide disabled:opacity-50"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-blue-200 hover:text-white text-xs font-semibold transition-all duration-200 hover:underline tracking-wide disabled:opacity-50 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-xl border border-white/20 hover:border-white/30 backdrop-blur-sm"
                       disabled={isLoading}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
                       ¿OLVIDASTE TU CONTRASEÑA?
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
               </div>
