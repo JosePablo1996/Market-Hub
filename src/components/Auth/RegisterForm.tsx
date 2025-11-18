@@ -1,18 +1,18 @@
 // src/components/Auth/RegisterForm.tsx
 import React, { useState, useMemo } from 'react'
 import { useAuth } from '../../contexts/useAuth'
-import { Eye, EyeOff, Lock, Mail, User, Phone, Shield, CheckCircle, ChevronDown, X } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail, User, Phone, Shield, CheckCircle, ChevronDown, X, Eye as EyeIcon, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const RegisterForm: React.FC = () => {
-  const { signUp, loading: authLoading } = useAuth()
+  const { signUp, loading: authLoading, enableGuestMode } = useAuth()
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     confirmPassword: '',
     fullName: '',
     phone: '',
-    role: 'user' as 'user' | 'proveedor'
+    role: 'user' as 'user' | 'proveedor' | 'guest'
   })
   const [formLoading, setFormLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -61,6 +61,9 @@ const RegisterForm: React.FC = () => {
   }, [formData.password, formData.confirmPassword])
 
   const isFormValid = useMemo(() => {
+    if (formData.role === 'guest') {
+      return true // Para invitado, no necesita validación de formulario
+    }
     return (
       formData.email &&
       formData.password &&
@@ -79,13 +82,24 @@ const RegisterForm: React.FC = () => {
     }))
   }
 
-  const handleRoleSelect = (role: 'user' | 'proveedor') => {
+  const handleRoleSelect = (role: 'user' | 'proveedor' | 'guest') => {
     setFormData(prev => ({ ...prev, role }))
     setShowRoleModal(false)
+    
+    // Si selecciona invitado, activar modo invitado inmediatamente
+    if (role === 'guest') {
+      enableGuestMode()
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Si es invitado, no procesar el formulario normal
+    if (formData.role === 'guest') {
+      enableGuestMode()
+      return
+    }
     
     if (!passwordsMatch) {
       setError('Las contraseñas no coinciden')
@@ -105,7 +119,7 @@ const RegisterForm: React.FC = () => {
         formData.email,
         formData.password,
         formData.fullName,
-        formData.role
+        formData.role as 'user' | 'proveedor' // Excluir 'guest' ya que se maneja diferente
       )
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -126,6 +140,8 @@ const RegisterForm: React.FC = () => {
         return 'Compra productos y disfruta de ofertas exclusivas'
       case 'proveedor':
         return 'Publica y gestiona tus productos en nuestra plataforma'
+      case 'guest':
+        return 'Explora el catálogo sin crear una cuenta permanente'
       default:
         return ''
     }
@@ -137,6 +153,8 @@ const RegisterForm: React.FC = () => {
         return '👤'
       case 'proveedor':
         return '🏢'
+      case 'guest':
+        return '👁️'
       default:
         return '👤'
     }
@@ -148,6 +166,8 @@ const RegisterForm: React.FC = () => {
         return 'Usuario Comprador'
       case 'proveedor':
         return 'Proveedor'
+      case 'guest':
+        return 'Invitado'
       default:
         return role
     }
@@ -161,6 +181,95 @@ const RegisterForm: React.FC = () => {
     { label: 'Al menos un carácter especial', met: /[^A-Za-z0-9]/.test(formData.password) },
     { label: '12+ caracteres (recomendado)', met: formData.password.length >= 12 }
   ]
+
+  // Si el rol es invitado, mostrar vista simplificada
+  if (formData.role === 'guest') {
+    return (
+      <div className="w-full max-w-7xl mx-auto p-4">
+        <motion.div 
+          className="bg-white/20 backdrop-blur-2xl border border-white/30 rounded-3xl shadow-2xl p-8 relative overflow-hidden"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          {/* Efecto de fondo decorativo */}
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-orange-600/10 rounded-3xl"></div>
+          <div className="absolute -top-32 -right-32 w-64 h-64 bg-amber-400/20 rounded-full blur-2xl"></div>
+          <div className="absolute -bottom-32 -left-32 w-64 h-64 bg-orange-400/20 rounded-full blur-2xl"></div>
+          
+          <div className="relative z-10 text-center">
+            {/* Header del Formulario */}
+            <div className="text-center mb-8">
+              <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-amber-500 to-orange-600 rounded-3xl mx-auto mb-4 shadow-2xl">
+                <EyeIcon className="h-10 w-10 text-white" />
+              </div>
+              <h2 className="text-4xl font-bold bg-gradient-to-r from-white to-amber-200 bg-clip-text text-transparent mb-3">
+                Modo Invitado
+              </h2>
+              <p className="text-amber-200 text-lg">
+                Explora nuestro catálogo sin registrarte
+              </p>
+            </div>
+
+            {/* Información del modo invitado */}
+            <div className="bg-white/10 border border-white/20 rounded-2xl p-6 backdrop-blur-sm mb-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-center space-x-3">
+                  <CheckCircle className="h-6 w-6 text-green-400" />
+                  <span className="text-white font-semibold">Acceso inmediato al catálogo</span>
+                </div>
+                <div className="flex items-center justify-center space-x-3">
+                  <CheckCircle className="h-6 w-6 text-green-400" />
+                  <span className="text-white font-semibold">Sin necesidad de registro</span>
+                </div>
+                <div className="flex items-center justify-center space-x-3">
+                  <CheckCircle className="h-6 w-6 text-green-400" />
+                  <span className="text-white font-semibold">Navegación libre y segura</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Botón para continuar como invitado */}
+            <motion.button
+              onClick={enableGuestMode}
+              disabled={isLoading}
+              className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold py-4 px-6 rounded-2xl focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 focus:ring-offset-transparent disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 shadow-2xl hover:shadow-3xl flex items-center justify-center space-x-3 relative overflow-hidden group"
+              whileHover={{ scale: isLoading ? 1 : 1.02 }}
+              whileTap={{ scale: isLoading ? 1 : 0.98 }}
+            >
+              <div className="absolute inset-0 bg-white/10 backdrop-blur-sm group-hover:bg-white/20 transition-all duration-300"></div>
+              {isLoading ? (
+                <>
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="rounded-full h-5 w-5 border-b-2 border-white relative z-10"
+                  />
+                  <span className="text-base font-semibold relative z-10">Iniciando...</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-5 w-5 relative z-10" />
+                  <span className="text-base font-semibold relative z-10">Comenzar a Explorar</span>
+                </>
+              )}
+            </motion.button>
+
+            {/* Botón para cambiar tipo de cuenta */}
+            <div className="mt-6">
+              <button
+                type="button"
+                onClick={() => setShowRoleModal(true)}
+                className="text-amber-200 hover:text-white underline transition duration-200 font-semibold"
+              >
+                Quiero crear una cuenta permanente
+              </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4">
@@ -582,7 +691,7 @@ const RegisterForm: React.FC = () => {
               </div>
 
               <div className="space-y-4">
-                {(['user', 'proveedor'] as const).map((role) => (
+                {(['user', 'proveedor', 'guest'] as const).map((role) => (
                   <motion.button
                     key={role}
                     type="button"
@@ -590,7 +699,9 @@ const RegisterForm: React.FC = () => {
                     disabled={isLoading}
                     className={`w-full p-4 text-left rounded-2xl transition-all duration-300 border-2 ${
                       formData.role === role 
-                        ? 'bg-purple-600/20 border-purple-500 shadow-lg' 
+                        ? role === 'guest' 
+                          ? 'bg-amber-600/20 border-amber-500 shadow-lg' 
+                          : 'bg-purple-600/20 border-purple-500 shadow-lg'
                         : 'bg-white/10 border-white/20 hover:bg-white/15 hover:border-purple-400/50'
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                     whileHover={{ scale: 1.02 }}
@@ -603,12 +714,14 @@ const RegisterForm: React.FC = () => {
                         <div className="font-semibold text-white text-lg">
                           {getRoleDisplayName(role)}
                         </div>
-                        <div className="text-purple-200 text-sm mt-1">
+                        <div className={`text-sm mt-1 ${role === 'guest' ? 'text-amber-200' : 'text-purple-200'}`}>
                           {getRoleDescription(role)}
                         </div>
                       </div>
                       {formData.role === role && (
-                        <CheckCircle className="h-6 w-6 text-green-400 flex-shrink-0" />
+                        <CheckCircle className={`h-6 w-6 flex-shrink-0 ${
+                          role === 'guest' ? 'text-amber-400' : 'text-green-400'
+                        }`} />
                       )}
                     </div>
                   </motion.button>

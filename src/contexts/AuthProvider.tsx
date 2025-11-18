@@ -12,8 +12,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
+  const [guestMode, setGuestMode] = useState(false) // <- NUEVO: Estado para modo invitado
 
   useEffect(() => {
+    // Si ya está en modo invitado, no hacer nada con la autenticación
+    if (guestMode) {
+      setLoading(false)
+      return
+    }
+
     // Obtener sesión inicial
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -41,7 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [guestMode]) // <- Agrega guestMode como dependencia
 
   const fetchProfile = async (userId: string, isRetry: boolean = false): Promise<void> => {
     try {
@@ -138,8 +145,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
+  // <- NUEVAS FUNCIONES PARA MODO INVITADO
+  const enableGuestMode = () => {
+    console.log('🔓 Activando modo invitado')
+    setGuestMode(true)
+    setLoading(false)
+    setSession(null)
+    setUser(null)
+    setProfile(null)
+    setProfileError(null)
+  }
+
+  const disableGuestMode = () => {
+    console.log('🔒 Desactivando modo invitado')
+    setGuestMode(false)
+    setLoading(true)
+    // Al desactivar el modo invitado, verificar si hay sesión activa
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchProfile(session.user.id)
+      } else {
+        setLoading(false)
+      }
+    })
+  }
+
   const signIn = async (email: string, password: string) => {
     setProfileError(null)
+    setGuestMode(false) // Desactivar modo invitado al hacer login
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -149,6 +182,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const handleSignUp = async (email: string, password: string, fullName: string, userRole: 'user' | 'proveedor') => {
     setProfileError(null)
+    setGuestMode(false) // Desactivar modo invitado al registrarse
     
     try {
       console.log('🚀 INICIANDO REGISTRO para:', email, 'con rol:', userRole)
@@ -261,6 +295,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     setProfileError(null)
+    setGuestMode(false) // Desactivar modo invitado al cerrar sesión
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }
@@ -270,9 +305,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     profile,
     loading,
+    guestMode,  // <- NUEVO
     signIn,
     signUp: handleSignUp,
     signOut,
+    enableGuestMode,  // <- NUEVO
+    disableGuestMode,  // <- NUEVO
   }
 
   return (

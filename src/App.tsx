@@ -6,7 +6,8 @@ import RegisterForm from './components/Auth/RegisterForm'
 import UserDashboard from './components/User/UserDashboard'
 import ProveedorDashboard from './components/Proveedor/ProveedorDashboard'
 import AdminDashboard from './components/Admin/AdminDashboard'
-import { LogOut, ShoppingBag, User, Shield, Menu, X, Star, Zap, Globe } from 'lucide-react'
+import { GuestDashboard } from './components/Guest/GuestDashboard'
+import { LogOut, ShoppingBag, User, Shield, Menu, X, Star, Zap, Globe, Eye, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Estilos glassmorphism para header y footer
@@ -57,8 +58,16 @@ const LoadingScreen = () => {
   )
 }
 
-// Componente mejorado para manejar la autenticación
-const AuthHandler = ({ mode, onSwitchMode }: { mode: 'login' | 'register', onSwitchMode: () => void }) => {
+// Componente mejorado para manejar la autenticación con modo invitado
+const AuthHandler = ({ 
+  mode, 
+  onSwitchMode,
+  onEnableGuestMode 
+}: { 
+  mode: 'login' | 'register'
+  onSwitchMode: () => void
+  onEnableGuestMode: () => void
+}) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl">
@@ -66,28 +75,97 @@ const AuthHandler = ({ mode, onSwitchMode }: { mode: 'login' | 'register', onSwi
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
           <h1 className="text-6xl font-bold text-white mb-4 tracking-tight">
             MarketHub
           </h1>
-          <p className="text-xl text-white/80 font-light">
+          <p className="text-xl text-white/80 font-light mb-8">
             Tu plataforma de comercio confiable
           </p>
+
+          {/* Botón para modo invitado - POSICIONADO ARRIBA */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex justify-center mb-8"
+          >
+            <motion.button
+              whileHover={{ 
+                scale: 1.05,
+                y: -2,
+                boxShadow: "0 20px 40px rgba(245, 158, 11, 0.3)"
+              }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onEnableGuestMode}
+              className="group relative bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600 text-white font-bold px-12 py-5 rounded-2xl transition-all duration-300 flex items-center justify-center space-x-4 shadow-2xl border-2 border-amber-300/30 overflow-hidden"
+            >
+              {/* Efecto de brillo */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12"
+                animate={{ x: ["0%", "200%", "0%"] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              />
+              
+              {/* Icono con animación */}
+              <motion.div
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Eye className="h-7 w-7" />
+              </motion.div>
+              
+              {/* Texto */}
+              <div className="text-center">
+                <div className="text-lg font-bold tracking-wide">
+                  Explorar como Invitado
+                </div>
+                <div className="text-amber-100 text-sm font-medium mt-1">
+                  Accede al catálogo sin registro
+                </div>
+              </div>
+
+              {/* Sparkle icon */}
+              <motion.div
+                animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <Sparkles className="h-5 w-5 text-yellow-200" />
+              </motion.div>
+
+              {/* Efecto de borde brillante */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-200/0 via-amber-200/20 to-amber-200/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            </motion.button>
+          </motion.div>
+        </motion.div>
+
+        {/* Separador elegante */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.5 }}
+          className="flex items-center justify-center mb-8"
+        >
+          <div className="flex items-center space-x-4">
+            <div className="h-px w-20 bg-gradient-to-r from-transparent to-white/30"></div>
+            <span className="text-white/50 text-sm font-medium">O ingresa con tu cuenta</span>
+            <div className="h-px w-20 bg-gradient-to-r from-white/30 to-transparent"></div>
+          </div>
         </motion.div>
 
         {/* Contenedor del formulario */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.6 }}
           className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20 shadow-2xl"
         >
           {/* Título del formulario */}
           <motion.h2
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.7 }}
             className="text-3xl font-bold text-white text-center mb-8"
           >
             {mode === 'login' ? 'Iniciar Sesión' : 'Crear Cuenta'}
@@ -98,21 +176,11 @@ const AuthHandler = ({ mode, onSwitchMode }: { mode: 'login' | 'register', onSwi
             {mode === 'login' ? <LoginForm /> : <RegisterForm />}
           </div>
 
-          {/* Separador */}
-          <div className="relative my-8">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/20"></div>
-            </div>
-            <div className="relative flex justify-center">
-              <span className="bg-transparent px-4 text-white/60 text-sm">o</span>
-            </div>
-          </div>
-
-          {/* Botón para cambiar entre modos - Diseño minimalista */}
+          {/* Botón para cambiar entre modos */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.8 }}
             className="text-center"
           >
             <p className="text-white/70 mb-4">
@@ -128,25 +196,13 @@ const AuthHandler = ({ mode, onSwitchMode }: { mode: 'login' | 'register', onSwi
             </motion.button>
           </motion.div>
         </motion.div>
-
-        {/* Footer de autenticación */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="text-center mt-8"
-        >
-          <p className="text-white/40 text-sm">
-            © 2024 MarketHub. Todos los derechos reservados.
-          </p>
-        </motion.div>
       </div>
     </div>
   )
 }
 
 function App() {
-  const { user, profile, loading, signOut } = useAuth()
+  const { user, profile, loading, signOut, guestMode, enableGuestMode, disableGuestMode } = useAuth()
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
@@ -157,6 +213,8 @@ function App() {
         return <Shield className="h-6 w-6 text-purple-300" />
       case 'proveedor':
         return <ShoppingBag className="h-6 w-6 text-emerald-300" />
+      case 'guest':
+        return <Eye className="h-6 w-6 text-amber-300" />
       default:
         return <User className="h-6 w-6 text-blue-300" />
     }
@@ -169,6 +227,8 @@ function App() {
         return 'from-purple-500 to-purple-700 text-white shadow-purple-500/25'
       case 'proveedor':
         return 'from-emerald-500 to-green-700 text-white shadow-emerald-500/25'
+      case 'guest':
+        return 'from-amber-500 to-orange-600 text-white shadow-amber-500/25'
       default:
         return 'from-blue-500 to-cyan-600 text-white shadow-blue-500/25'
     }
@@ -181,13 +241,21 @@ function App() {
         return 'Administrador'
       case 'proveedor':
         return 'Proveedor'
+      case 'guest':
+        return 'Invitado'
       default:
         return 'Cliente'
     }
   }
 
-  // Renderizar el dashboard según el rol
+  // Renderizar el dashboard según el rol o modo
   const renderDashboard = () => {
+    // Si está en modo invitado
+    if (guestMode) {
+      return <GuestDashboard />
+    }
+
+    // Si está autenticado con un rol específico
     switch (profile?.role) {
       case 'admin':
         return <AdminDashboard />
@@ -208,22 +276,42 @@ function App() {
     }
   }
 
+  // Función para cerrar sesión que también desactiva el modo invitado
+  const handleSignOut = async () => {
+    await signOut()
+    // Asegurarse de que el modo invitado se desactive al cerrar sesión
+    if (guestMode) {
+      disableGuestMode()
+    }
+  }
+
+  // Función para activar modo invitado
+  const handleEnableGuestMode = () => {
+    enableGuestMode()
+  }
+
   // Pantalla de carga
   if (loading) {
     return <LoadingScreen />
   }
 
-  // Pantalla de autenticación
+  // Si está en modo invitado, mostrar solo el GuestDashboard sin header/footer
+  if (guestMode) {
+    return <GuestDashboard />
+  }
+
+  // Pantalla de autenticación (no hay usuario y no es modo invitado)
   if (!user) {
     return (
       <AuthHandler 
         mode={authMode}
         onSwitchMode={() => setAuthMode(authMode === 'login' ? 'register' : 'login')}
+        onEnableGuestMode={handleEnableGuestMode}
       />
     )
   }
 
-  // Aplicación principal con header y footer
+  // Aplicación principal con header y footer para usuarios autenticados
   return (
     <motion.div 
       initial={{ opacity: 0 }}
@@ -313,7 +401,7 @@ function App() {
               <motion.button
                 whileHover={{ scale: 1.05, y: -2 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={signOut}
+                onClick={handleSignOut}
                 className="flex items-center px-6 py-3 text-sm font-bold text-white hover:text-white/90 rounded-xl transition-all duration-300 hover:shadow-lg bg-white/10 backdrop-blur-sm border border-white/20"
               >
                 <LogOut className="h-5 w-5 mr-2" />
@@ -393,7 +481,7 @@ function App() {
                       animate={{ x: 0, opacity: 1 }}
                       transition={{ delay: 0.2 }}
                       whileTap={{ scale: 0.95 }}
-                      onClick={signOut}
+                      onClick={handleSignOut}
                       className="w-full flex items-center justify-center px-4 py-4 text-sm font-bold text-white hover:text-white/90 rounded-xl transition-all duration-300 bg-white/10 backdrop-blur-sm border border-white/20"
                     >
                       <LogOut className="h-5 w-5 mr-2" />
@@ -407,7 +495,7 @@ function App() {
         </div>
       </motion.header>
 
-      {/* Main Content - Los componentes manejan su propia personalización */}
+      {/* Main Content */}
       <motion.main 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -471,9 +559,9 @@ function App() {
                   className="flex items-center space-x-2 text-white mb-2"
                 >
                   <Star className="h-5 w-5 text-yellow-300" />
-                  <span className="font-bold">v2.0.0</span>
+                  <span className="font-bold">v2.1.0</span>
                 </motion.div>
-                <div className="text-white/70 text-xs">Ultima versión</div>
+                <div className="text-white/70 text-xs">Con modo invitado</div>
               </div>
             </motion.div>
 
@@ -496,7 +584,6 @@ function App() {
               <div className="font-bold text-white bg-gradient-to-r from-blue-300 to-purple-300 bg-clip-text text-transparent text-lg">
                 Jose Pablo Miranda Quintanilla
               </div>
-              <div className="text-white/70 text-sm mt-1">© 2025 MarketHub - Todos los derechos reservados</div>
             </motion.div>
           </div>
         </div>
