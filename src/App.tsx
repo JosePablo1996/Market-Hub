@@ -295,13 +295,8 @@ function App() {
     return <LoadingScreen />
   }
 
-  // Si está en modo invitado, mostrar solo el GuestDashboard sin header/footer
-  if (guestMode) {
-    return <GuestDashboard />
-  }
-
   // Pantalla de autenticación (no hay usuario y no es modo invitado)
-  if (!user) {
+  if (!user && !guestMode) {
     return (
       <AuthHandler 
         mode={authMode}
@@ -311,14 +306,14 @@ function App() {
     )
   }
 
-  // Aplicación principal con header y footer para usuarios autenticados
+  // Aplicación principal con header y footer para usuarios autenticados Y modo invitado
   return (
     <motion.div 
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600 flex flex-col"
     >
-      {/* Header */}
+      {/* Header - Ahora se muestra también en modo invitado */}
       <motion.header 
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -370,10 +365,10 @@ function App() {
                 whileHover={{ scale: 1.02, y: -2 }}
                 className="flex items-center space-x-4 rounded-2xl px-6 py-4 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/20"
               >
-                <div className={`flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r ${getRoleColor(profile?.role || 'user')} shadow-lg`}>
-                  {getRoleIcon(profile?.role || 'user')}
+                <div className={`flex items-center space-x-2 px-4 py-2 rounded-xl bg-gradient-to-r ${getRoleColor(guestMode ? 'guest' : profile?.role || 'user')} shadow-lg`}>
+                  {getRoleIcon(guestMode ? 'guest' : profile?.role || 'user')}
                   <span className="text-sm font-bold capitalize">
-                    {getRoleDisplayName(profile?.role || 'user')}
+                    {getRoleDisplayName(guestMode ? 'guest' : profile?.role || 'user')}
                   </span>
                 </div>
                 <div className="h-10 w-px bg-gradient-to-b from-transparent via-white/50 to-transparent"></div>
@@ -391,9 +386,11 @@ function App() {
                   </motion.div>
                   <div>
                     <p className="text-sm font-bold text-white">
-                      {profile?.full_name || 'Usuario'}
+                      {guestMode ? 'Invitado' : profile?.full_name || 'Usuario'}
                     </p>
-                    <p className="text-xs text-white/70">Bienvenido de vuelta</p>
+                    <p className="text-xs text-white/70">
+                      {guestMode ? 'Modo de exploración' : 'Bienvenido de vuelta'}
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -405,7 +402,7 @@ function App() {
                 className="flex items-center px-6 py-3 text-sm font-bold text-white hover:text-white/90 rounded-xl transition-all duration-300 hover:shadow-lg bg-white/10 backdrop-blur-sm border border-white/20"
               >
                 <LogOut className="h-5 w-5 mr-2" />
-                Cerrar Sesión
+                {guestMode ? 'Salir del modo invitado' : 'Cerrar Sesión'}
               </motion.button>
             </div>
 
@@ -462,15 +459,15 @@ function App() {
                       transition={{ delay: 0.1 }}
                       className="flex items-center space-x-4 p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10"
                     >
-                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-r ${getRoleColor(profile?.role || 'user')} flex items-center justify-center shadow-lg`}>
-                        {getRoleIcon(profile?.role || 'user')}
+                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-r ${getRoleColor(guestMode ? 'guest' : profile?.role || 'user')} flex items-center justify-center shadow-lg`}>
+                        {getRoleIcon(guestMode ? 'guest' : profile?.role || 'user')}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-white truncate">
-                          {profile?.full_name || 'Usuario'}
+                          {guestMode ? 'Invitado' : profile?.full_name || 'Usuario'}
                         </p>
                         <p className="text-xs text-white/70 font-semibold capitalize">
-                          {getRoleDisplayName(profile?.role || 'user')}
+                          {getRoleDisplayName(guestMode ? 'guest' : profile?.role || 'user')}
                         </p>
                       </div>
                     </motion.div>
@@ -485,7 +482,7 @@ function App() {
                       className="w-full flex items-center justify-center px-4 py-4 text-sm font-bold text-white hover:text-white/90 rounded-xl transition-all duration-300 bg-white/10 backdrop-blur-sm border border-white/20"
                     >
                       <LogOut className="h-5 w-5 mr-2" />
-                      Cerrar Sesión
+                      {guestMode ? 'Salir del modo invitado' : 'Cerrar Sesión'}
                     </motion.button>
                   </div>
                 </div>
@@ -505,7 +502,7 @@ function App() {
         {renderDashboard()}
       </motion.main>
 
-      {/* Footer */}
+      {/* Footer - Ahora se muestra también en modo invitado */}
       <motion.footer 
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -530,6 +527,9 @@ function App() {
               </motion.div>
               <div>
                 <h3 className="font-bold text-white text-lg">MarketHub</h3>
+                <p className="text-white/70 text-sm">
+                  {guestMode ? 'Modo Invitado Activo' : 'Plataforma de Comercio'}
+                </p>
               </div>
             </motion.div>
 

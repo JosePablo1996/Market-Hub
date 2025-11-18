@@ -21,8 +21,7 @@ import {
   ChevronDown,
   X,
   LogIn,
-  UserPlus,
-  ArrowLeft
+  UserPlus
 } from 'lucide-react'
 
 // Interface completamente independiente para evitar conflictos
@@ -263,37 +262,8 @@ export const GuestDashboard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 to-indigo-800 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header Mejorado con Botones de Navegación */}
+        {/* Header Simplificado - Solo título e información */}
         <div className="text-center mb-12">
-          {/* Botones de Navegación - Parte Superior */}
-          <div className="flex justify-between items-center mb-8">
-            <button
-              onClick={handleGoToLogin}
-              className="flex items-center space-x-2 bg-white/10 hover:bg-white/20 border border-white/30 text-white px-6 py-3 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:shadow-lg group"
-            >
-              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-              <span>Volver al Inicio</span>
-            </button>
-
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={handleGoToLogin}
-                className="flex items-center space-x-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-400/50 text-white px-6 py-3 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:shadow-lg group"
-              >
-                <LogIn className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                <span>Iniciar Sesión</span>
-              </button>
-
-              <button
-                onClick={handleGoToRegister}
-                className="flex items-center space-x-2 bg-green-500/20 hover:bg-green-500/30 border border-green-400/50 text-white px-6 py-3 rounded-2xl transition-all duration-300 backdrop-blur-sm hover:shadow-lg group"
-              >
-                <UserPlus className="h-4 w-4 group-hover:scale-110 transition-transform" />
-                <span>Crear Cuenta</span>
-              </button>
-            </div>
-          </div>
-
           {/* Logo y Título */}
           <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-3xl mx-auto mb-6 shadow-2xl">
             <ShoppingBag className="h-10 w-10 text-white" />
@@ -829,7 +799,7 @@ export const GuestDashboard: React.FC = () => {
           </div>
         )}
 
-        {/* Footer con Botones de Navegación */}
+        {/* Footer con Botones de Navegación - MANTENIDO */}
         <div className="mt-12 pt-8 border-t border-white/20">
           <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl p-8">
             <div className="text-center">
