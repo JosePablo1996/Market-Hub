@@ -13,14 +13,15 @@ dist
 dist-ssr
 *.local
 
-# Environment variables
+# Environment variables - IGNORAR variables de Supabase
 .env
 .env.*
 !.env.example
 
-# Archivos específicos a ignorar
+# Archivos específicos a ignorar - AGREGAR estos 3 archivos
 create_readme.bat
 Licencia_MIT.bat
+Imagen de WhatsApp 2025-11-19 a las 22.01.22_84cd9a56.jpg
 
 # Editor directories and files
 .vscode/*

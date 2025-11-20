@@ -1,5 +1,5 @@
 // src/App.tsx
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAuth } from './contexts/useAuth'
 import LoginForm from './components/Auth/LoginForm'
 import RegisterForm from './components/Auth/RegisterForm'
@@ -8,7 +8,7 @@ import ProveedorDashboard from './components/Proveedor/ProveedorDashboard'
 import AdminDashboard from './components/Admin/AdminDashboard'
 import { GuestDashboard } from './components/Guest/GuestDashboard'
 import { SplashScreen } from './components/Splash/SplashScreen'
-import { LogOut, ShoppingBag, User, Shield, Menu, X, Star, Zap, Globe, Eye, Sparkles } from 'lucide-react'
+import { LogOut, ShoppingBag, User, Shield, Menu, X, Star, Zap, Globe, Eye, CheckCircle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 // Estilos glassmorphism para header y footer
@@ -56,6 +56,78 @@ const LoadingScreen = () => {
         </motion.p>
       </motion.div>
     </motion.div>
+  )
+}
+
+// Modal de éxito de inicio de sesión similar a la imagen
+const SuccessModal = ({ 
+  isOpen, 
+  onClose 
+}: { 
+  isOpen: boolean
+  onClose: () => void
+}) => {
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.8, opacity: 0, y: 20 }}
+            className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-8 w-full max-w-md border border-white/10 shadow-2xl"
+          >
+            {/* Header del modal */}
+            <div className="text-center mb-6">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2 }}
+                className="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center shadow-lg"
+              >
+                <CheckCircle className="h-10 w-10 text-white" />
+              </motion.div>
+              <h3 className="text-2xl font-bold text-white mb-2">
+                ¡Sesión Iniciada Exitosamente!
+              </h3>
+              <p className="text-white/70">
+                Bienvenido de nuevo a <strong>MarketHub</strong>.
+              </p>
+            </div>
+
+            {/* Contenido del modal */}
+            <div className="space-y-4 mb-6">
+              <p className="text-white/80 text-sm text-center">
+                Tu sesión ha sido iniciada correctamente. Ahora puedes acceder a todas las funcionalidades de la plataforma.
+              </p>
+
+              <div className="bg-blue-500/10 rounded-2xl p-4 border border-blue-400/20">
+                <p className="text-blue-300 font-semibold text-sm mb-2 text-center">
+                  Continuar al Sistema
+                </p>
+                <p className="text-blue-200 text-xs text-center">
+                  Ahora puedes explorar todas las funciones disponibles en tu dashboard personalizado.
+                </p>
+              </div>
+            </div>
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={onClose}
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 shadow-lg"
+            >
+              Continuar al Dashboard
+            </motion.button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 
@@ -227,14 +299,6 @@ const AuthHandler = ({
                 </div>
               </div>
 
-              {/* Sparkle icon */}
-              <motion.div
-                animate={{ scale: [1, 1.2, 1], rotate: [0, 180, 360] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Sparkles className="h-5 w-5 text-yellow-200" />
-              </motion.div>
-
               {/* Efecto de borde brillante */}
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-amber-200/0 via-amber-200/20 to-amber-200/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </motion.button>
@@ -308,6 +372,23 @@ function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [showSplash, setShowSplash] = useState(true)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [hasShownSuccess, setHasShownSuccess] = useState(false)
+
+  // Corregir el error del useEffect usando un flag
+  useEffect(() => {
+    // Solo mostrar el modal de éxito si el usuario se acaba de autenticar
+    // y no hemos mostrado el modal antes
+    if (user && !guestMode && !loading && !hasShownSuccess) {
+      // Usar setTimeout para evitar el setState síncrono dentro del efecto
+      const timer = setTimeout(() => {
+        setShowSuccessModal(true)
+        setHasShownSuccess(true)
+      }, 100)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [user, guestMode, loading, hasShownSuccess])
 
   // Función para obtener el icono según el rol
   const getRoleIcon = (role: string) => {
@@ -387,6 +468,8 @@ function App() {
   // Función para confirmar el cierre de sesión
   const confirmSignOut = async () => {
     setShowLogoutModal(false)
+    // Resetear el flag de éxito al cerrar sesión
+    setHasShownSuccess(false)
     await signOut()
     // Asegurarse de que el modo invitado se desactive al cerrar sesión
     if (guestMode) {
@@ -442,7 +525,7 @@ function App() {
       animate={{ opacity: 1 }}
       className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-700 to-pink-600 flex flex-col"
     >
-      {/* Header - Ahora se muestra también en modo invitado */}
+      {/* Header - Diseño original glassmorphism */}
       <motion.header 
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -621,7 +704,7 @@ function App() {
         {renderDashboard()}
       </motion.main>
 
-      {/* Footer - Ahora se muestra también en modo invitado */}
+      {/* Footer - Glassmorphism */}
       <motion.footer 
         initial={{ y: 100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -680,7 +763,7 @@ function App() {
                   <Star className="h-5 w-5 text-yellow-300" />
                   <span className="font-bold">v2.2.0</span>
                 </motion.div>
-                <div className="text-white/70 text-xs"></div>
+                <div className="text-white/70 text-xs">Versión estable</div>
               </div>
             </motion.div>
 
@@ -707,6 +790,12 @@ function App() {
           </div>
         </div>
       </motion.footer>
+
+      {/* Modal de éxito de inicio de sesión */}
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+      />
 
       {/* Modal de confirmación para cerrar sesión */}
       <LogoutConfirmationModal
